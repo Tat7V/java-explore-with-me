@@ -25,6 +25,8 @@ public class StatsClient {
     RestTemplate restTemplate;
     StatsClientConfig config;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final String HIT_ENDPOINT = "/hit";
+    private static final String STATS_ENDPOINT = "/stats";
 
     public StatsClient(StatsClientConfig config) {
         this.config = config;
@@ -44,11 +46,8 @@ public class StatsClient {
         HttpEntity<EndpointHit> request = new HttpEntity<>(endpointHit, headers);
 
         try {
-            restTemplate.postForEntity(
-                    config.getServerUrl() + "/hit",
-                    request,
-                    Void.class
-            );
+            String url = String.format("%s%s", config.getServerUrl(), HIT_ENDPOINT);
+            restTemplate.postForEntity(url, request, Void.class);
         } catch (Exception e) {
             log.warn("Не удалось отправить hit в сервис статистики: {}", e.getMessage());
         }
@@ -59,7 +58,8 @@ public class StatsClient {
             String encodedStart = URLEncoder.encode(start.format(FORMATTER), StandardCharsets.UTF_8);
             String encodedEnd = URLEncoder.encode(end.format(FORMATTER), StandardCharsets.UTF_8);
 
-            StringBuilder urlBuilder = new StringBuilder(config.getServerUrl() + "/stats");
+            StringBuilder urlBuilder = new StringBuilder();
+            urlBuilder.append(String.format("%s%s", config.getServerUrl(), STATS_ENDPOINT));
             urlBuilder.append("?start=").append(encodedStart);
             urlBuilder.append("&end=").append(encodedEnd);
 
