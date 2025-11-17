@@ -9,4 +9,3 @@ public class ExploreWithMeMain {
         SpringApplication.run(ExploreWithMeMain.class, args);
     }
 }
-

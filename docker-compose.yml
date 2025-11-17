@@ -56,8 +56,16 @@ services:
     container_name: ewm-service
     ports:
       - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm
+      SPRING_DATASOURCE_USERNAME: ewm
+      SPRING_DATASOURCE_PASSWORD: ewm
+      STATS_SERVER_URL: http://stats-server:9090
+      STATS_APP_NAME: ewm-main-service
     depends_on:
       ewm-db:
+        condition: service_healthy
+      stats-server:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
