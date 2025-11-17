@@ -25,7 +25,9 @@ public class CategoryService {
     @Transactional
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         categoryRepository.findByName(newCategoryDto.getName())
-                .ifPresent(c -> { throw new RuntimeException("Category already exists"); });
+                .ifPresent(c -> {
+                    throw new RuntimeException("Category already exists");
+                });
         Category category = CategoryMapper.toCategory(newCategoryDto);
         Category savedCategory = categoryRepository.save(category);
         return CategoryMapper.toCategoryDto(savedCategory);
@@ -56,7 +58,9 @@ public class CategoryService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         categoryRepository.findByName(newCategoryDto.getName())
                 .filter(existing -> !existing.getId().equals(catId))
-                .ifPresent(c -> { throw new RuntimeException("Category already exists"); });
+                .ifPresent(c -> {
+                    throw new RuntimeException("Category already exists");
+                });
         category.setName(newCategoryDto.getName());
         Category updatedCategory = categoryRepository.save(category);
         return CategoryMapper.toCategoryDto(updatedCategory);

@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CompilationMapper {
-    public static CompilationDto toCompilationDto(Compilation compilation, 
+    public static CompilationDto toCompilationDto(Compilation compilation,
                                                    RequestRepository requestRepository,
                                                    StatsService statsService) {
         CompilationDto dto = new CompilationDto();
         dto.setId(compilation.getId());
         dto.setTitle(compilation.getTitle());
         dto.setPinned(compilation.getPinned());
-        
+
         List<EventShortDto> events = compilation.getEvents().stream()
                 .map(e -> {
                     Long confirmedRequests = requestRepository.countByEventIdAndStatus(
@@ -28,7 +28,7 @@ public class CompilationMapper {
                     return EventMapper.toEventShortDto(e, confirmedRequests, views);
                 })
                 .collect(Collectors.toList());
-        
+
         dto.setEvents(events);
         return dto;
     }

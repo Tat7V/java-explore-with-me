@@ -34,7 +34,7 @@ public class EventMapper {
         EventShortDto dto = new EventShortDto();
         dto.setId(event.getId());
         dto.setAnnotation(event.getAnnotation());
-        
+
         try {
             if (event.getCategory() == null) {
                 throw new RuntimeException(String.format("Event category cannot be null for event %d", event.getId()));
@@ -43,11 +43,11 @@ public class EventMapper {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Error mapping category for event %d: %s", event.getId(), e.getMessage()), e);
         }
-        
+
         dto.setEventDate(event.getEventDate());
         dto.setPaid(event.getPaid());
         dto.setTitle(event.getTitle());
-        
+
         try {
             if (event.getInitiator() == null) {
                 throw new RuntimeException(String.format("Event initiator cannot be null for event %d", event.getId()));
@@ -56,7 +56,7 @@ public class EventMapper {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Error mapping initiator for event %d: %s", event.getId(), e.getMessage()), e);
         }
-        
+
         dto.setConfirmedRequests(confirmedRequests);
         dto.setViews(views);
         return dto;

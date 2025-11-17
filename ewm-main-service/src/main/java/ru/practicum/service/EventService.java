@@ -40,7 +40,7 @@ public class EventService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         var category = categoryRepository.findById(newEventDto.getCategory())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-        
+
         Event event = EventMapper.toEvent(newEventDto, category, user);
         Event savedEvent = eventRepository.save(event);
         return EventMapper.toEventFullDto(savedEvent, 0L, 0L);
@@ -51,7 +51,7 @@ public class EventService {
         Pageable pageable = PageRequest.of(from / size, size);
         Page<Event> events = eventRepository.findByInitiatorId(userId, pageable);
         return events.stream()
-                .map(e -> EventMapper.toEventShortDto(e, 
+                .map(e -> EventMapper.toEventShortDto(e,
                         requestRepository.countByEventIdAndStatus(e.getId(), ru.practicum.model.RequestStatus.CONFIRMED),
                         getViews(e.getId())))
                 .collect(Collectors.toList());
@@ -70,13 +70,13 @@ public class EventService {
     public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
-        
+
         if (event.getState() == EventState.PUBLISHED) {
             throw new RuntimeException("Request already exists");
         }
-        
+
         updateEventFields(event, updateRequest);
-        
+
         if (updateRequest.getStateAction() != null) {
             if ("SEND_TO_REVIEW".equals(updateRequest.getStateAction())) {
                 event.setState(EventState.PENDING);
@@ -84,7 +84,7 @@ public class EventService {
                 event.setState(EventState.CANCELED);
             }
         }
-        
+
         Event updatedEvent = eventRepository.save(event);
         return EventMapper.toEventFullDto(updatedEvent,
                 requestRepository.countByEventIdAndStatus(eventId, ru.practicum.model.RequestStatus.CONFIRMED),
@@ -97,17 +97,17 @@ public class EventService {
                                                 Integer from, Integer size) {
         List<EventState> eventStates =
                 (states != null ? states.stream().map(EventState::valueOf).collect(Collectors.toList()) : List.of(EventState.values()));
-        
-        log.debug("getEventsByAdmin: users={}, categories={}, states={}, rangeStart={}, rangeEnd={}, from={}, size={}", 
+
+        log.debug("getEventsByAdmin: users={}, categories={}, states={}, rangeStart={}, rangeEnd={}, from={}, size={}",
                 users, categories, states, rangeStart, rangeEnd, from, size);
-        
+
         boolean usersAll = (users == null || users.isEmpty());
         boolean categoriesAll = (categories == null || categories.isEmpty());
         List<Long> usersParam = usersAll ? List.of(-1L) : users;
         List<Long> categoriesParam = categoriesAll ? List.of(-1L) : categories;
-        
-        List<Event> filtered = eventRepository.
-                findAllForAdminFiltered(
+
+        List<Event> filtered = eventRepository
+                .findAllForAdminFiltered(
                         usersParam,
                         usersAll,
                         eventStates,
@@ -116,15 +116,15 @@ public class EventService {
                         rangeStart,
                         rangeEnd
                 );
-        
+
         log.debug("After DB filtering: {} events", filtered.size());
-        
+
         int start = Math.min(from, filtered.size());
         int end = Math.min(start + size, filtered.size());
         List<Event> paginated = filtered.subList(start, end);
-        
+
         log.debug("After pagination: {} events", paginated.size());
-        
+
         return paginated.stream()
                 .map(e -> EventMapper.toEventFullDto(e,
                         requestRepository.countByEventIdAndStatus(e.getId(), ru.practicum.model.RequestStatus.CONFIRMED),
@@ -136,9 +136,9 @@ public class EventService {
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateRequest) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
-        
+
         updateEventFields(event, updateRequest);
-        
+
         if (updateRequest.getStateAction() != null) {
             if ("PUBLISH_EVENT".equals(updateRequest.getStateAction())) {
                 if (event.getState() != EventState.PENDING) {
@@ -153,7 +153,7 @@ public class EventService {
                 event.setState(EventState.CANCELED);
             }
         }
-        
+
         Event updated = eventRepository.save(event);
         return EventMapper.toEventFullDto(updated,
                 requestRepository.countByEventIdAndStatus(eventId, ru.practicum.model.RequestStatus.CONFIRMED),
@@ -165,16 +165,16 @@ public class EventService {
                                                 LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                 Boolean onlyAvailable, String sort, Integer from, Integer size,
                                                 String uri, String ip) {
-        log.debug("getPublicEvents called with text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}", 
+        log.debug("getPublicEvents called with text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
-        
+
         final LocalDateTime actualStart = (rangeStart == null && rangeEnd == null) ? LocalDateTime.now() : rangeStart;
         final LocalDateTime actualEnd = rangeEnd;
-        
+
         if (actualStart != null && actualEnd != null && actualStart.isAfter(actualEnd)) {
             throw new RuntimeException("rangeStart must be before rangeEnd");
         }
-        
+
         try {
             if (size == null || size <= 0) {
                 size = 10;
@@ -184,13 +184,13 @@ public class EventService {
             }
             Pageable pageable = PageRequest.of(0, 10000);
             Page<Event> allEvents = eventRepository.findAllPublishedEvents(pageable);
-            
+
             log.debug("Repository returned {} events", allEvents.getTotalElements());
-            
+
             List<Event> filtered = allEvents.stream()
-                    .filter(e -> text == null || text.isEmpty() || 
-                            (e.getAnnotation() != null && e.getAnnotation().toLowerCase().contains(text.toLowerCase())) ||
-                            (e.getDescription() != null && e.getDescription().toLowerCase().contains(text.toLowerCase())))
+                    .filter(e -> text == null || text.isEmpty()
+                            || (e.getAnnotation() != null && e.getAnnotation().toLowerCase().contains(text.toLowerCase()))
+                            || (e.getDescription() != null && e.getDescription().toLowerCase().contains(text.toLowerCase())))
                     .filter(e -> categories == null || categories.isEmpty() || categories.contains(e.getCategory().getId()))
                     .filter(e -> paid == null || e.getPaid().equals(paid))
                     .filter(e -> {
@@ -202,17 +202,17 @@ public class EventService {
                         return e2 == null || e.getEventDate().isBefore(e2) || e.getEventDate().isEqual(e2);
                     })
                     .collect(Collectors.toList());
-            
+
             if (!"VIEWS".equals(sort)) {
                 filtered.sort((a, b) -> a.getEventDate().compareTo(b.getEventDate()));
             }
-            
+
             int start = from;
             int end = Math.min(start + size, filtered.size());
             List<Event> events = filtered.subList(start, end);
-            
+
             log.debug("After filtering: {} events", events.size());
-            
+
             for (Event e : events) {
                 try {
                     if (e.getCategory() != null) {
@@ -234,7 +234,7 @@ public class EventService {
             } catch (Exception e) {
                 // ignore
             }
-            
+
             List<EventShortDto> result;
             if (events.isEmpty()) {
                 log.debug("No events found, returning empty list");
@@ -245,7 +245,7 @@ public class EventService {
                 List<String> eventUris = ids.stream()
                         .map(id -> "/events/" + id)
                         .collect(Collectors.toList());
-                
+
                 Map<String, Long> viewsMap = java.util.Collections.emptyMap();
                 try {
                     if (!eventUris.isEmpty()) {
@@ -266,7 +266,7 @@ public class EventService {
                 } catch (Exception e) {
                     log.warn("Error getting stats: {}", e.getMessage(), e);
                 }
-                
+
                 final Map<String, Long> finalViewsMap = viewsMap;
                 log.debug("Mapping {} events to DTOs", events.size());
                 result = events.stream()
@@ -283,11 +283,11 @@ public class EventService {
                         .collect(Collectors.toList());
                 log.debug("Successfully mapped {} events", result.size());
             }
-            
+
             if (!"VIEWS".equals(sort) && !result.isEmpty()) {
                 result.sort((a, b) -> Long.compare(b.getViews(), a.getViews()));
             }
-            
+
             return result;
         } catch (Exception e) {
             log.error("Error in getPublicEvents: {}", e.getMessage(), e);
@@ -299,21 +299,21 @@ public class EventService {
     public EventFullDto getPublicEvent(Long eventId, String uri, String ip) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
-        
+
         if (event.getState() != EventState.PUBLISHED) {
             throw new RuntimeException("Event not found");
         }
 
         Long viewsBefore = getViews(eventId);
-        
+
         try {
             statsService.saveHit(uri, ip);
         } catch (Exception e) {
             // ignore
         }
-        
+
         Long views = viewsBefore + 1;
-        
+
         return EventMapper.toEventFullDto(event,
                 requestRepository.countByEventIdAndStatus(eventId, ru.practicum.model.RequestStatus.CONFIRMED),
                 views);
