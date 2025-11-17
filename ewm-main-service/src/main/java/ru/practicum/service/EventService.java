@@ -225,7 +225,7 @@ public class EventService {
                     }
                 } catch (Exception ex) {
                     log.error("Error loading related entities for event {}: {}", e.getId(), ex.getMessage(), ex);
-                    throw new RuntimeException("Error loading event data: " + ex.getMessage(), ex);
+                    throw new RuntimeException(String.format("Error loading event data: %s", ex.getMessage()), ex);
                 }
             }
 
@@ -277,7 +277,7 @@ public class EventService {
                                 return EventMapper.toEventShortDto(e, confirmed, v);
                             } catch (Exception ex) {
                                 log.error("Error mapping event {}: {}", e.getId(), ex.getMessage(), ex);
-                                throw new RuntimeException("Error mapping event " + e.getId() + ": " + ex.getMessage(), ex);
+                                throw new RuntimeException(String.format("Error mapping event %d: %s", e.getId(), ex.getMessage()), ex);
                             }
                         })
                         .collect(Collectors.toList());
@@ -291,7 +291,7 @@ public class EventService {
             return result;
         } catch (Exception e) {
             log.error("Error in getPublicEvents: {}", e.getMessage(), e);
-            throw new RuntimeException("Error getting public events: " + e.getMessage(), e);
+            throw new RuntimeException(String.format("Error getting public events: %s", e.getMessage()), e);
         }
     }
 

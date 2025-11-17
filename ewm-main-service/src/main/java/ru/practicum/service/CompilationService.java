@@ -53,7 +53,7 @@ public class CompilationService {
     @Transactional
     public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest updateRequest) {
         Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new RuntimeException("Подборка не найдена"));
+                .orElseThrow(() -> new RuntimeException("Compilation not found"));
         if (updateRequest.getTitle() != null) {
             compilation.setTitle(updateRequest.getTitle());
         }
@@ -82,7 +82,7 @@ public class CompilationService {
     @Transactional(readOnly = true)
     public CompilationDto getCompilation(Long compId) {
         Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new RuntimeException("Подборка не найдена"));
+                .orElseThrow(() -> new RuntimeException("Compilation not found"));
         return CompilationMapper.toCompilationDto(compilation, requestRepository, statsService);
     }
 }

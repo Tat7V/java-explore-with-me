@@ -25,7 +25,7 @@ public class CategoryService {
     @Transactional
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         categoryRepository.findByName(newCategoryDto.getName())
-                .ifPresent(c -> { throw new RuntimeException("Категория уже существует"); });
+                .ifPresent(c -> { throw new RuntimeException("Category already exists"); });
         Category category = CategoryMapper.toCategory(newCategoryDto);
         Category savedCategory = categoryRepository.save(category);
         return CategoryMapper.toCategoryDto(savedCategory);
@@ -46,17 +46,17 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryDto getCategory(Long catId) {
         Category category = categoryRepository.findById(catId)
-                .orElseThrow(() -> new RuntimeException("Категория не найдена"));
+                .orElseThrow(() -> new RuntimeException("Category not found"));
         return CategoryMapper.toCategoryDto(category);
     }
 
     @Transactional
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
         Category category = categoryRepository.findById(catId)
-                .orElseThrow(() -> new RuntimeException("Категория не найдена"));
+                .orElseThrow(() -> new RuntimeException("Category not found"));
         categoryRepository.findByName(newCategoryDto.getName())
                 .filter(existing -> !existing.getId().equals(catId))
-                .ifPresent(c -> { throw new RuntimeException("Категория уже существует"); });
+                .ifPresent(c -> { throw new RuntimeException("Category already exists"); });
         category.setName(newCategoryDto.getName());
         Category updatedCategory = categoryRepository.save(category);
         return CategoryMapper.toCategoryDto(updatedCategory);

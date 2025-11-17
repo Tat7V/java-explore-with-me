@@ -34,24 +34,24 @@ public class RequestService {
     @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Событие не найдено"));
+                .orElseThrow(() -> new RuntimeException("Event not found"));
         if (event.getInitiator().getId().equals(userId)) {
-            throw new RuntimeException("Нельзя подать заявку на своё событие");
+            throw new RuntimeException("Cannot create request for own event");
         }
         if (event.getState() != ru.practicum.model.EventState.PUBLISHED) {
-            throw new RuntimeException("Событие не опубликовано");
+            throw new RuntimeException("Event not published");
         }
         if (requestRepository.findByEventIdAndRequesterId(eventId, userId).isPresent()) {
-            throw new RuntimeException("Заявка уже существует");
+            throw new RuntimeException("Request already exists");
         }
         Long confirmed = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
         if (event.getParticipantLimit() > 0 && confirmed >= event.getParticipantLimit()) {
-            throw new RuntimeException("Достигнут лимит участников");
+            throw new RuntimeException("Participant limit reached");
         }
         Request request = new Request();
         request.setEvent(event);
         request.setRequester(userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден")));
+                .orElseThrow(() -> new RuntimeException("User not found")));
         if (event.getParticipantLimit() == 0) {
             request.setStatus(RequestStatus.CONFIRMED);
         } else {
@@ -72,12 +72,12 @@ public class RequestService {
     @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Заявка не найдена"));
+                .orElseThrow(() -> new RuntimeException("Request not found"));
         if (!request.getRequester().getId().equals(userId)) {
-            throw new RuntimeException("Заявка не принадлежит пользователю");
+            throw new RuntimeException("Request does not belong to user");
         }
         if (request.getStatus() == RequestStatus.CONFIRMED) {
-            throw new RuntimeException("Нельзя отменить подтверждённую заявку");
+            throw new RuntimeException("Cannot cancel confirmed request");
         }
         request.setStatus(RequestStatus.CANCELED);
         Request updated = requestRepository.save(request);
@@ -87,9 +87,9 @@ public class RequestService {
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Событие не найдено"));
+                .orElseThrow(() -> new RuntimeException("Event not found"));
         if (!event.getInitiator().getId().equals(userId)) {
-            throw new RuntimeException("Пользователь не является инициатором события");
+            throw new RuntimeException("User is not the event initiator");
         }
         return requestRepository.findByEventId(eventId).stream()
                 .map(RequestMapper::toParticipationRequestDto)
@@ -100,16 +100,16 @@ public class RequestService {
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest updateRequest) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Событие не найдено"));
+                .orElseThrow(() -> new RuntimeException("Event not found"));
         if (!event.getInitiator().getId().equals(userId)) {
-            throw new RuntimeException("Пользователь не является инициатором события");
+            throw new RuntimeException("User is not the event initiator");
         }
         List<Request> requests = requestRepository.findByIdIn(updateRequest.getRequestIds());
         if (requests.stream().anyMatch(r -> r.getStatus() == RequestStatus.CONFIRMED)) {
-            throw new RuntimeException("Нельзя отменить подтверждённую заявку");
+            throw new RuntimeException("Cannot cancel confirmed request");
         }
         if (requests.stream().anyMatch(r -> r.getStatus() != RequestStatus.PENDING)) {
-            throw new RuntimeException("Статус заявки должен быть PENDING");
+            throw new RuntimeException("Request status must be PENDING");
         }
         EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
         result.setConfirmedRequests(new java.util.ArrayList<>());
@@ -118,7 +118,7 @@ public class RequestService {
         for (Request r : requests) {
             if ("CONFIRMED".equals(updateRequest.getStatus())) {
                 if (event.getParticipantLimit() > 0 && confirmed >= event.getParticipantLimit()) {
-                    throw new RuntimeException("Достигнут лимит участников");
+                    throw new RuntimeException("Participant limit reached");
                 }
                 r.setStatus(RequestStatus.CONFIRMED);
                 confirmed++;
