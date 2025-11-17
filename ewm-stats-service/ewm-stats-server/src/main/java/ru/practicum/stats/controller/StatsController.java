@@ -47,7 +47,6 @@ public class StatsController {
 
         LocalDateTime startTime;
         LocalDateTime endTime;
-        
         try {
             startTime = LocalDateTime.parse(decodedStart, FORMATTER);
             endTime = LocalDateTime.parse(decodedEnd, FORMATTER);
