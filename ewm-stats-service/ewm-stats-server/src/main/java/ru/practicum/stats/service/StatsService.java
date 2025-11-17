@@ -32,6 +32,9 @@ public class StatsService {
 
     @Transactional(readOnly = true)
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        if (uris != null && uris.isEmpty()) {
+            return List.of();
+        }
         if (Boolean.TRUE.equals(unique)) {
             return statsRepository.getUniqueStats(start, end, uris);
         } else {

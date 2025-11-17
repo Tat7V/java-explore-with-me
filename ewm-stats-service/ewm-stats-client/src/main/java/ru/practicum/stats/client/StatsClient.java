@@ -9,11 +9,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.stats.dto.EndpointHit;
 import ru.practicum.stats.dto.ViewStats;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -55,26 +54,23 @@ public class StatsClient {
 
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         try {
-            String encodedStart = URLEncoder.encode(start.format(FORMATTER), StandardCharsets.UTF_8);
-            String encodedEnd = URLEncoder.encode(end.format(FORMATTER), StandardCharsets.UTF_8);
-
-            StringBuilder urlBuilder = new StringBuilder();
-            urlBuilder.append(String.format("%s%s", config.getServerUrl(), STATS_ENDPOINT));
-            urlBuilder.append("?start=").append(encodedStart);
-            urlBuilder.append("&end=").append(encodedEnd);
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromHttpUrl(String.format("%s%s", config.getServerUrl(), STATS_ENDPOINT))
+                    .queryParam("start", start.format(FORMATTER))
+                    .queryParam("end", end.format(FORMATTER));
 
             if (uris != null && !uris.isEmpty()) {
                 for (String uri : uris) {
-                    urlBuilder.append("&uris=").append(URLEncoder.encode(uri, StandardCharsets.UTF_8));
+                    builder.queryParam("uris", uri);
                 }
             }
 
             if (Boolean.TRUE.equals(unique)) {
-                urlBuilder.append("&unique=true");
+                builder.queryParam("unique", true);
             }
 
             ResponseEntity<ViewStats[]> response = restTemplate.exchange(
-                    urlBuilder.toString(),
+                    builder.build(true).toUriString(),
                     HttpMethod.GET,
                     null,
                     ViewStats[].class

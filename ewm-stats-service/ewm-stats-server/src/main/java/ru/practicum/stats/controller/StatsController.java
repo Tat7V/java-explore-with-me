@@ -37,16 +37,26 @@ public class StatsController {
 
     @GetMapping("/stats")
     public ResponseEntity<List<ViewStats>> getStats(
-            @RequestParam String start,
-            @RequestParam String end,
+            @RequestParam(required = true) String start,
+            @RequestParam(required = true) String end,
             @RequestParam(required = false) List<String> uris,
             @RequestParam(required = false, defaultValue = "false") Boolean unique) {
 
         String decodedStart = URLDecoder.decode(start, StandardCharsets.UTF_8);
         String decodedEnd = URLDecoder.decode(end, StandardCharsets.UTF_8);
 
-        LocalDateTime startTime = LocalDateTime.parse(decodedStart, FORMATTER);
-        LocalDateTime endTime = LocalDateTime.parse(decodedEnd, FORMATTER);
+        LocalDateTime startTime;
+        LocalDateTime endTime;
+        try {
+            startTime = LocalDateTime.parse(decodedStart, FORMATTER);
+            endTime = LocalDateTime.parse(decodedEnd, FORMATTER);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid date format");
+        }
+
+        if (startTime.isAfter(endTime)) {
+            throw new RuntimeException("Start date must be before end date");
+        }
 
         List<ViewStats> stats = statsService.getStats(startTime, endTime, uris, unique);
         return ResponseEntity.ok(stats);
