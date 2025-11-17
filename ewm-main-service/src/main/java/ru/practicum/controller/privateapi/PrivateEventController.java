@@ -1,7 +1,6 @@
 package ru.practicum.controller.privateapi;
 
 import jakarta.validation.Valid;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
