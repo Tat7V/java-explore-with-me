@@ -17,19 +17,20 @@ import ru.practicum.service.CategoryService;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminCategoryController {
     CategoryService categoryService;
+    private static final String PATH_CAT_ID = "/{catId}";
 
     @PostMapping
     public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(newCategoryDto));
     }
 
-    @PatchMapping("/{catId}")
+    @PatchMapping(PATH_CAT_ID)
     public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long catId,
                                                        @Valid @RequestBody NewCategoryDto newCategoryDto) {
         return ResponseEntity.ok(categoryService.updateCategory(catId, newCategoryDto));
     }
 
-    @DeleteMapping("/{catId}")
+    @DeleteMapping(PATH_CAT_ID)
     public ResponseEntity<Void> deleteCategory(@PathVariable Long catId) {
         categoryService.deleteCategory(catId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

@@ -18,19 +18,20 @@ import ru.practicum.service.CompilationService;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminCompilationController {
     CompilationService compilationService;
+    private static final String PATH_COMP_ID = "/{compId}";
 
     @PostMapping
     public ResponseEntity<CompilationDto> createCompilation(@Valid @RequestBody NewCompilationDto newCompilationDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(compilationService.createCompilation(newCompilationDto));
     }
 
-    @DeleteMapping("/{compId}")
+    @DeleteMapping(PATH_COMP_ID)
     public ResponseEntity<Void> deleteCompilation(@PathVariable Long compId) {
         compilationService.deleteCompilation(compId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PatchMapping("/{compId}")
+    @PatchMapping(PATH_COMP_ID)
     public ResponseEntity<CompilationDto> updateCompilation(@PathVariable Long compId,
                                                              @Valid @RequestBody UpdateCompilationRequest updateRequest) {
         return ResponseEntity.ok(compilationService.updateCompilation(compId, updateRequest));

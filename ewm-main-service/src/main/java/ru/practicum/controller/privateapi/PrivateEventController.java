@@ -21,6 +21,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PrivateEventController {
     EventService eventService;
+    private static final String PATH_EVENT_ID = "/{eventId}";
 
     @PostMapping
     public ResponseEntity<EventFullDto> createEvent(@PathVariable Long userId,
@@ -36,13 +37,13 @@ public class PrivateEventController {
         return ResponseEntity.ok(eventService.getUserEvents(userId, from, size));
     }
 
-    @GetMapping("/{eventId}")
+    @GetMapping(PATH_EVENT_ID)
     public ResponseEntity<EventFullDto> getUserEvent(@PathVariable Long userId,
                                                        @PathVariable Long eventId) {
         return ResponseEntity.ok(eventService.getUserEvent(userId, eventId));
     }
 
-    @PatchMapping("/{eventId}")
+    @PatchMapping(PATH_EVENT_ID)
     public ResponseEntity<EventFullDto> updateEvent(@PathVariable Long userId,
                                                      @PathVariable Long eventId,
                                                      @Valid @RequestBody UpdateEventUserRequest updateRequest) {
