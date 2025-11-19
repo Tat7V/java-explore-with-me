@@ -72,7 +72,7 @@ public class EventService {
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
         if (event.getState() == EventState.PUBLISHED) {
-            throw new RuntimeException("Request already exists");
+            throw new RuntimeException("Event already exists");
         }
 
         updateEventFields(event, updateRequest);
