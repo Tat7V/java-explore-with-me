@@ -37,12 +37,12 @@ public class CommentService {
     @Transactional
     public CommentDto createComment(Long userId, Long eventId, NewCommentDto newCommentDto) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)));
         if (event.getState() != EventState.PUBLISHED) {
-            throw new RuntimeException("Event not published");
+            throw new RuntimeException(String.format("Event with id '%d' not published", eventId));
         }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("User with id '%d' not found", userId)));
         Comment comment = CommentMapper.toComment(newCommentDto, event, user);
         Comment saved = commentRepository.save(comment);
         return CommentMapper.toCommentDto(saved);
@@ -51,7 +51,7 @@ public class CommentService {
     @Transactional
     public CommentDto updateComment(Long userId, Long commentId, UpdateCommentRequest updateRequest) {
         Comment comment = commentRepository.findByIdAndAuthorId(commentId, userId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Comment with id '%d' not found", commentId)));
         if (comment.getStatus() == CommentStatus.PUBLISHED) {
             throw new RuntimeException("Cannot edit published comment");
         }
@@ -65,7 +65,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long userId, Long commentId) {
         Comment comment = commentRepository.findByIdAndAuthorId(commentId, userId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Comment with id '%d' not found", commentId)));
         commentRepository.delete(comment);
     }
 
@@ -99,7 +99,7 @@ public class CommentService {
     @Transactional
     public CommentDto moderateComment(Long commentId, UpdateCommentStatusRequest updateRequest) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Comment with id '%d' not found", commentId)));
         CommentStatus newStatus = CommentStatus.valueOf(updateRequest.getStatus());
         if (newStatus == CommentStatus.PUBLISHED && comment.getStatus() == CommentStatus.REJECTED) {
             throw new RuntimeException("Only pending comments can be published");
