@@ -31,7 +31,7 @@ public class RequestService {
     @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)));
         if (event.getInitiator().getId().equals(userId)) {
             throw new RuntimeException("Cannot create request for own event");
         }
@@ -48,7 +48,7 @@ public class RequestService {
         Request request = new Request();
         request.setEvent(event);
         request.setRequester(userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found")));
+                .orElseThrow(() -> new RuntimeException(String.format("User with id '%d' not found", userId))));
         if (event.getParticipantLimit() == 0) {
             request.setStatus(RequestStatus.CONFIRMED);
         } else {
@@ -69,9 +69,9 @@ public class RequestService {
     @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Request with id '%d' not found", requestId)));
         if (!request.getRequester().getId().equals(userId)) {
-            throw new RuntimeException("Request does not belong to user");
+            throw new RuntimeException(String.format("Request with id '%d' does not belong to user with id '%d'", requestId, userId));
         }
         if (request.getStatus() == RequestStatus.CONFIRMED) {
             throw new RuntimeException("Cannot cancel confirmed request");
@@ -84,7 +84,7 @@ public class RequestService {
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)));
         if (!event.getInitiator().getId().equals(userId)) {
             throw new RuntimeException("User is not the event initiator");
         }
@@ -97,7 +97,8 @@ public class RequestService {
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest updateRequest) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)
+                ));
         if (!event.getInitiator().getId().equals(userId)) {
             throw new RuntimeException("User is not the event initiator");
         }

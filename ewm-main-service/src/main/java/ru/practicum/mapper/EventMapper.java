@@ -7,59 +7,59 @@ import ru.practicum.model.Location;
 
 public class EventMapper {
     public static EventFullDto toEventFullDto(Event event, Long confirmedRequests, Long views) {
-        EventFullDto dto = new EventFullDto();
-        dto.setId(event.getId());
-        dto.setAnnotation(event.getAnnotation());
-        dto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
-        dto.setDescription(event.getDescription());
-        dto.setEventDate(event.getEventDate());
-        dto.setLocation(new LocationDto(event.getLocation().getLat(), event.getLocation().getLon()));
-        dto.setPaid(event.getPaid());
-        dto.setParticipantLimit(event.getParticipantLimit());
-        dto.setRequestModeration(event.getRequestModeration());
-        dto.setTitle(event.getTitle());
-        dto.setState(event.getState().name());
-        dto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
-        dto.setCreatedOn(event.getCreatedOn());
-        dto.setPublishedOn(event.getPublishedOn());
-        dto.setConfirmedRequests(confirmedRequests);
-        dto.setViews(views);
-        return dto;
+        EventFullDto eventFullDto = new EventFullDto();
+        eventFullDto.setId(event.getId());
+        eventFullDto.setAnnotation(event.getAnnotation());
+        eventFullDto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
+        eventFullDto.setDescription(event.getDescription());
+        eventFullDto.setEventDate(event.getEventDate());
+        eventFullDto.setLocation(new LocationDto(event.getLocation().getLat(), event.getLocation().getLon()));
+        eventFullDto.setPaid(event.getPaid());
+        eventFullDto.setParticipantLimit(event.getParticipantLimit());
+        eventFullDto.setRequestModeration(event.getRequestModeration());
+        eventFullDto.setTitle(event.getTitle());
+        eventFullDto.setState(event.getState().name());
+        eventFullDto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
+        eventFullDto.setCreatedOn(event.getCreatedOn());
+        eventFullDto.setPublishedOn(event.getPublishedOn());
+        eventFullDto.setConfirmedRequests(confirmedRequests);
+        eventFullDto.setViews(views);
+        return eventFullDto;
     }
 
     public static EventShortDto toEventShortDto(Event event, Long confirmedRequests, Long views) {
         if (event == null) {
             throw new RuntimeException("Event cannot be null");
         }
-        EventShortDto dto = new EventShortDto();
-        dto.setId(event.getId());
-        dto.setAnnotation(event.getAnnotation());
+        EventShortDto eventShortDto = new EventShortDto();
+        eventShortDto.setId(event.getId());
+        eventShortDto.setAnnotation(event.getAnnotation());
 
         try {
             if (event.getCategory() == null) {
                 throw new RuntimeException(String.format("Event category cannot be null for event %d", event.getId()));
             }
-            dto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
+            eventShortDto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
         } catch (Exception e) {
             throw new RuntimeException(String.format("Error mapping category for event %d: %s", event.getId(), e.getMessage()), e);
         }
 
-        dto.setEventDate(event.getEventDate());
-        dto.setPaid(event.getPaid());
-        dto.setTitle(event.getTitle());
+        eventShortDto.setEventDate(event.getEventDate());
+        eventShortDto.setPaid(event.getPaid());
+        eventShortDto.setTitle(event.getTitle());
 
         try {
             if (event.getInitiator() == null) {
                 throw new RuntimeException(String.format("Event initiator cannot be null for event %d", event.getId()));
             }
-            dto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
+            eventShortDto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
         } catch (Exception e) {
             throw new RuntimeException(String.format("Error mapping initiator for event %d: %s", event.getId(), e.getMessage()), e);
         }
 
-        dto.setConfirmedRequests(confirmedRequests);
-        dto.setViews(views);
-        return dto;
+        eventShortDto.setConfirmedRequests(confirmedRequests);
+        eventShortDto.setViews(views);
+        return eventShortDto;
     }
 
     public static Event toEvent(NewEventDto newEventDto, ru.practicum.model.Category category, ru.practicum.model.User initiator) {

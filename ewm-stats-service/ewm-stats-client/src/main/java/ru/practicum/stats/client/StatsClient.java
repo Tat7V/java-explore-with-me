@@ -48,7 +48,7 @@ public class StatsClient {
             String url = String.format("%s%s", config.getServerUrl(), HIT_ENDPOINT);
             restTemplate.postForEntity(url, request, Void.class);
         } catch (Exception e) {
-            log.warn("Не удалось отправить hit в сервис статистики: {}", e.getMessage());
+            log.warn("Failed to send hit to statistics service: {}", e.getMessage());
         }
     }
 
@@ -78,7 +78,7 @@ public class StatsClient {
 
             return Arrays.asList(response.getBody());
         } catch (Exception e) {
-            log.warn("Не удалось получить статистику: {}", e.getMessage());
+            log.warn("Failed to get statistics: {}", e.getMessage());
             return List.of();
         }
     }

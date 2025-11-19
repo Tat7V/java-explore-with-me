@@ -48,14 +48,14 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryDto getCategory(Long catId) {
         Category category = categoryRepository.findById(catId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Category with id '%d' not found", catId)));
         return CategoryMapper.toCategoryDto(category);
     }
 
     @Transactional
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
         Category category = categoryRepository.findById(catId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Category with id '%d' not found", catId)));
         categoryRepository.findByName(newCategoryDto.getName())
                 .filter(existing -> !existing.getId().equals(catId))
                 .ifPresent(c -> {
