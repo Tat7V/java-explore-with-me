@@ -39,7 +39,7 @@ public class CommentService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)));
         if (event.getState() != EventState.PUBLISHED) {
-            throw new RuntimeException(String.format("Event with id '%d' not published", eventId));
+            throw new RuntimeException("Event not published");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException(String.format("User with id '%d' not found", userId)));
