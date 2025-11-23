@@ -15,10 +15,10 @@ public class CompilationMapper {
     public static CompilationDto toCompilationDto(Compilation compilation,
                                                    RequestRepository requestRepository,
                                                    StatsService statsService) {
-        CompilationDto dto = new CompilationDto();
-        dto.setId(compilation.getId());
-        dto.setTitle(compilation.getTitle());
-        dto.setPinned(compilation.getPinned());
+        CompilationDto compilationDto = new CompilationDto();
+        compilationDto.setId(compilation.getId());
+        compilationDto.setTitle(compilation.getTitle());
+        compilationDto.setPinned(compilation.getPinned());
 
         List<EventShortDto> events = compilation.getEvents().stream()
                 .map(e -> {
@@ -29,8 +29,8 @@ public class CompilationMapper {
                 })
                 .collect(Collectors.toList());
 
-        dto.setEvents(events);
-        return dto;
+        compilationDto.setEvents(events);
+        return compilationDto;
     }
 
     private static Long getViews(Long eventId, StatsService statsService) {

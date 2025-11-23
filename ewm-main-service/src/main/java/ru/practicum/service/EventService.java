@@ -37,9 +37,9 @@ public class EventService {
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
         var user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("User with id '%d' not found", userId)));
         var category = categoryRepository.findById(newEventDto.getCategory())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Category '%d' not found", newEventDto.getCategory())));
 
         Event event = EventMapper.toEvent(newEventDto, category, user);
         Event savedEvent = eventRepository.save(event);
@@ -60,7 +60,7 @@ public class EventService {
     @Transactional(readOnly = true)
     public EventFullDto getUserEvent(Long userId, Long eventId) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)));
         return EventMapper.toEventFullDto(event,
                 requestRepository.countByEventIdAndStatus(eventId, ru.practicum.model.RequestStatus.CONFIRMED),
                 getViews(eventId));
@@ -69,10 +69,10 @@ public class EventService {
     @Transactional
     public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)));
 
         if (event.getState() == EventState.PUBLISHED) {
-            throw new RuntimeException("Request already exists");
+            throw new RuntimeException("Event already exists");
         }
 
         updateEventFields(event, updateRequest);
@@ -135,7 +135,7 @@ public class EventService {
     @Transactional
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateRequest) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)));
 
         updateEventFields(event, updateRequest);
 
@@ -298,10 +298,10 @@ public class EventService {
     @Transactional(readOnly = true)
     public EventFullDto getPublicEvent(Long eventId, String uri, String ip) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new RuntimeException(String.format("Event with id '%d' not found", eventId)));
 
         if (event.getState() != EventState.PUBLISHED) {
-            throw new RuntimeException("Event not found");
+            throw new RuntimeException(String.format("Event with id '%d' not found", eventId));
         }
 
         Long viewsBefore = getViews(eventId);
@@ -325,7 +325,8 @@ public class EventService {
         }
         if (updateRequest.getCategory() != null) {
             var category = categoryRepository.findById(updateRequest.getCategory())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                    .orElseThrow(() -> new RuntimeException(String.format("Category '%d' not found", updateRequest.getCategory())
+                    ));
             event.setCategory(category);
         }
         if (updateRequest.getDescription() != null) {
@@ -359,7 +360,8 @@ public class EventService {
         }
         if (updateRequest.getCategory() != null) {
             var category = categoryRepository.findById(updateRequest.getCategory())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                    .orElseThrow(() -> new RuntimeException(String.format("Category '%d' not found", updateRequest.getCategory())
+                    ));
             event.setCategory(category);
         }
         if (updateRequest.getDescription() != null) {
